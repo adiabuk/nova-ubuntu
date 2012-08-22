@@ -1,0 +1,15 @@
+__EOM__
+
+
+mydate=`date +"%d-%b-%H-%M"`
+
+echo "Starting Nova-Ubuntu......"
+virt-install --name nova-ubuntu-$mydate \
+             --ram 512 \
+	     --disk path=/var/lib/libvirt/images/nova-ubuntu-$mydate.qcow2,size=60,format=qcow2  \
+             --os-variant ubuntumaverick \
+             --cdrom $file \
+             --force \
+             --connect=qemu:///system
+echo done;
+

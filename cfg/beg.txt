@@ -1,0 +1,23 @@
+#!/bin/bash
+
+function die() {
+
+echo $1
+exit 1
+
+}
+
+for i in sharutils virt-viewer virt-manager kvm; do
+  
+dpkg -l $i &>/dev/null
+[[ $? -eq 0 ]] || packages="$packages $i"
+
+done
+
+[[ ! -z $packages ]] && die "Unsatisified dependencies, please run $(tput sgr 1 0) sudo apt-get install $packages$(tput sgr0) and try again"
+
+echo "Extracting files....."
+file=`mktemp /tmp/nova-ubuntu.iso.XXXX`
+[[ $? -eq 0 ]] || exit 1
+uudecode -o $file <<'__EOM__'
+

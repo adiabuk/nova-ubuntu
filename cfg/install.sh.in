@@ -1,0 +1,106 @@
+#!/bin/bash
+
+uuencode=0
+binary=1
+
+
+
+function untar_payload()
+{
+        echo "Extracting Image: ${file}...."
+	match=$(grep --text --line-number '^PAYLOAD:$' $0 | cut -d ':' -f 1)
+	payload_start=$((match + 1))
+	if [[ $binary -ne 0 ]]; then
+		tail -n +$payload_start $0 | zcat > $file
+	fi
+	if [[ $uuencode -ne 0 ]]; then
+		tail -n +$payload_start $0 | uudecode | tar -tzvf -
+	fi
+}
+
+function die() {
+
+echo $1
+exit 1
+
+}
+
+function usage() {
+
+die "Usage: $0 [extract|install]"
+
+}
+
+
+function check_packages(){
+
+  for i in sharutils virt-viewer virt-manager kvm; do
+
+    dpkg -l $i |grep -q ^ii &>/dev/null
+    [[ $? -eq 0 ]] || packages="$packages $i"
+
+  done
+
+  [[ ! -z $packages ]] && echo "Unsatisified dependencies, $(tput sgr 1 0) $packages$(tput sgr0) will now be installed....  You may be prompted for your sudo password..." && echo && echo && sudo apt-get -y install $packages
+
+}   
+
+
+function check_diskspace(){
+
+minimum=$1
+dir=/var/lib
+[[ -d /var/lib/libvirt ]] && dir=/var/lib/libvirt
+space_all=`df -B GB $dir | grep -vE '^Filesystem|tmpfs|cdrom' `
+space=`echo $space_all | awk '{ print $4 }'|awk -F'G' {'print $1'}`
+
+[[ $space -lt $minimum ]] && die "FAILED: Ensure you have more than ${minimum}G available space in your /var/lib/libvirt directory and try again...."
+
+
+}
+
+
+function create_image() {
+
+  mydate=`date +"%d-%b-%H-%M"`
+  release=`lsb_release  -r|awk {'print $2'}`
+
+  echo "Starting Nova-Ubuntu......"
+  virt-install --name nova-ubuntu-${version}-${mydate} \
+             --ram 4096 \
+             --vcpus=4  \
+	     --video=vmvga \
+             --disk path=/var/lib/libvirt/images/nova-ubuntu-${version}_${mydate}.qcow2,size=60,format=qcow2  \
+             --os-variant ubuntumaverick \
+             --cpu host \
+             --hvm \
+             --cdrom $file \
+             --force \
+             --connect=qemu:///system 
+  echo done;
+
+}
+
+function install() {
+
+  check_diskspace 10;
+  file=`mktemp`
+        check_packages; untar_payload;create_image
+  exit 0
+
+}
+
+function extract() {
+  echo "Extracting ISO Image...."
+  file="./nova-ubuntu_$version.iso"
+  check_packages 1;
+  untar_payload
+  echo "ISO Image has been extracted to $file";echo
+  exit 0
+}
+
+version=`echo $0|awk -F- {'print $2'}|awk -F. {'print $1"."$2"."$3'}`
+[[ "$1" ==  "install" ]] && install
+[[ "$1" == "extract" ]] && extract
+usage
+exit 0
