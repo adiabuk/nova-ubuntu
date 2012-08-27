@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<display id="win" anchor="ne" window-flags="sticky,below">
+ <meta author="Amro Diab"
+        version="0.1"
+        name="Nova Ubuntu"
+        category="Misc"
+        description="Displays Nova Ubuntu information" />
+<control id="myuri" interface="IURI:3mufry4gxx4vihs2dufszo21p-2" />
+<control id="iexec" interface="IExec:5vi419q1fv0vmu9wqadmetmy7"/>
+<control id="mytime" interface="ITime:9y703dqtfnv4w373caserz68r"/>
+
+   <group id="quotegroup">
+
+  <label id="system_lab" value="System: " font="Sans Bold 10" color="#5a0c0c"/>
+        <label id="system" value="updating..." font="Sans Bold 10" relative-to="system_lab,x" color="green"/>
+
+          <label id="version_lab" value="Version: " font="Sans Bold 10" relative-to="system_lab,y" color="#5a0c0c"  />
+          <label id="version" value="updating..." font="Sans Bold 10" relative-to="version_lab,x" color="green"  />
+          
+          <label id="date_lab" value="Release date: " font="Sans Bold 10" relative-to="version_lab,y" color="#5a0c0c"  />
+          <label id="date" value="updating..." font="Sans Bold 10" relative-to="date_lab,x" color="green"  />
+          <label id="ip_lab" value="IP Address: " font="Sans Bold 10" relative-to="date_lab,y" color="#5a0c0c"  /> 
+          <label id="ip" value="updating..." font="Sans Bold 10" relative-to="ip_lab,x" color="green"  />
+
+          <label id="vpn_lab" value="VPN available: " font="Sans Bold 10" relative-to="ip_lab,y" color="#5a0c0c"  />
+          <label id="vpn" value="updating..." font="Sans Bold 10" relative-to="vpn_lab,x" color="green"  />
+
+
+
+          <label id="blank_lab" relative-to="vpn_lab,y" />
+          
+	  <label id="chef_lab" value="Cookbook Version: " font="Sans Bold 10" relative-to="blank_lab,y" color="#5a0c0c"  />
+          <label id="chef" value="updating..." font="Sans Bold 10" relative-to="chef_lab,x" color="green"  />
+
+          <label id="api_lab" value="Nova-api Version: " font="Sans Bold 10" relative-to="chef_lab,y" color="#5a0c0c"  />
+          <label id="api" value="updating..." font="Sans Bold 10" relative-to="api_lab,x" color="green"  />
+
+          <label id="glance_lab" value="Glance-api Version: " font="Sans Bold 10" relative-to="api_lab,y" color="#5a0c0c"  />
+          <label id="glance" value="updating..." font="Sans Bold 10" relative-to="glance_lab,x" color="green"  />
+          
+	  <label id="novagit_lab" value="NovaGitHash: " font="Sans Bold 10" relative-to="glance_lab,y" color="#5a0c0c"  />
+          <label id="novagit" value="updating..." font="Sans Bold 10" relative-to="novagit_lab,x" color="green"  />
+	  <label id="installed_lab" value="Last Installed: " font="Sans Bold 10" relative-to="novagit_lab,y" color="#5a0c0c"  />
+          <label id="installed" value="updating..." font="Sans Bold 10" relative-to="installed_lab,x" color="green"  />
+	  <label id="changed_lab" value="Source modified: " font="Sans Bold 10" relative-to="installed_lab,y" color="#5a0c0c"  />
+          <label id="changed" value="updating..." font="Sans Bold 10" relative-to="changed_lab,x" color="green"  />
+	  <label id="valid_lab" value="Information gathered on: " font="Sans Bold 10" relative-to="changed_lab,y" color="#5a0c0c"  />
+          <label id="valid" value="updating..." font="Sans Bold 10" relative-to="valid_lab,x" color="green"  />
+	  
+	  <label id="fresh_lab" value="Last fresh install on: " font="Sans Bold 10" relative-to="valid_lab,y" color="#5a0c0c"  />
+          <label id="fresh" value="updating..." font="Sans Bold 10" relative-to="fresh_lab,x" color="green"  />
+	  
+	  <label id="cleanup_lab" value="Last cleanup on: " font="Sans Bold 10" relative-to="fresh_lab,y" color="#5a0c0c"  />
+          <label id="cleanup" value="updating..." font="Sans Bold 10" relative-to="cleanup_lab,x" color="green"  />
+  
+
+
+          <label id="blank_lab2" relative-to="novagit_lab,y" />
+   </group>
+
+
+
+<script>
+
+def getinfo(command):
+  print "getinfo"
+  
+
+
+def check_empty(string):
+  print "hello"
+  
+def installed():
+  #iexec.command='installed="installed";dpkg -l | grep python-nova 1> /dev/null 2>/dev/null || installed="not $installed";echo $installed'
+  #value=iexec.output
+  print "hi"
+
+ 
+def showinfo():
+  
+  iexec.command='cat /etc/nova-ubuntu|grep -i version|awk {\'print $2 $3\'} 2>/dev/null'
+  version=iexec.output
+  iexec.command='cat /etc/nova-ubuntu|grep -i date|awk {\'print $2\'} 2>/dev/null'
+  date=iexec.output
+  iexec.command='hostname -I |awk {\'print $1\'} || echo "Unable to retrieve IP Address"'
+  ip=iexec.output
+  iexec.command='/usr/bin/knife cookbook show nova |awk {\'print $2\'} 2>/dev/null'
+  chef=iexec.output
+
+  installed="installed"
+  
+  if installed=="installed": 
+    iexec.command='dpkg -l | grep nova-api|awk {\'print $3\'} 2>/dev/null'
+    api=iexec.output
+    iexec.command='dpkg -l | grep python-glance|awk {\'print $3\'} 2>/dev/null'
+    glance=iexec.output
+    iexec.command='dpkg --info  $(find /var/www -name `dpkg -l|grep "python-nova " |awk {\'print $2"_"$3\'}`*|head -1 2>/dev/null) |grep Git-Hash-Nova|awk {\'print $2\'} 2>/dev/null || echo "no git hash present"'
+    novagit=iexec.output
+    iexec.command='stat /usr/share/pyshared/nova|grep Change |awk {\'print $2 " " $3\'}|awk -F. {\'print $1\'} 2>/dev/null'
+    installed=iexec.output
+    iexec.command='debsums python-nova >/dev/null 2>/dev/null; echo $?'
+    changed=int(iexec.output)
+    if changed==0:
+      modified="no"
+      Dsp.changed.color="green"
+    elif changed==2:
+      modified="yes"
+      Dsp.changed.color="red"
+    else:
+      modified="unknown"
+      Dsp.changed.color="red"
+
+    iexec.command='/usr/local/bin/check_vpn >/dev/null 2>/dev/null; echo $?'
+    vpn=int(iexec.output)
+    if vpn==0:
+      available="yes"
+      Dsp.vpn.color="green"
+    elif vpn==2:
+      available="no"
+      Dsp.vpn.color="red"
+    else:
+      available="unknown"
+      Dsp.vpn.color="red"
+
+
+
+
+  iexec.command='date'
+  valid=iexec.output
+
+  iexec.command='stat /var/cache/nova-ubuntu/install.lck|grep Change |awk {\'print $2 " " $3\'}|awk -F. {\'print $1\'}'
+  fresh=iexec.output
+  iexec.command='stat /var/cache/nova-ubuntu/cleanup.lck|grep Change |awk {\'print $2 " " $3\'}|awk -F. {\'print $1\'}'
+  cleanup=iexec.output
+  #installed()
+  Dsp.version.value = str(version)
+  Dsp.system.value = "Nova-Ubuntu"
+  Dsp.date.value = date
+  Dsp.ip.value = ip
+  Dsp.chef.value = chef
+  Dsp.api.value = api
+  Dsp.glance.value = glance
+  Dsp.novagit.value=novagit
+  Dsp.installed.value=installed
+  Dsp.changed.value=modified
+  Dsp.vpn.value=available
+  Dsp.valid.value=valid
+  Dsp.fresh.value=fresh
+  Dsp.cleanup.value=cleanup
+  return True
+showinfo()
+add_timer(60000,showinfo)
+
+</script>
+
+</display>
+

@@ -1,0 +1,11 @@
+
+[Desktop Entry]
+Type=Application
+Exec=\s/usr/bin/gdesklets 
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name[en_GB]=Nova-Ubuntu
+Name=nova-ubuntu
+Comment[en_GB]=Displays Nova Ubuntu info
+Comment=Displays Nova Ubuntu info
