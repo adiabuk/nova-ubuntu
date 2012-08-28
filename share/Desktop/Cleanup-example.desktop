@@ -1,0 +1,10 @@
+
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=true
+Icon[en_GB]=/home/default/Pictures/sweep.jpeg
+Name[en_GB]=Cleanup-example
+Exec=/usr/local/bin/example-window
+Name=Cleanup
+Icon=/home/default/Pictures/sweep.jpeg
