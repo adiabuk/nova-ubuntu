@@ -1,0 +1,15 @@
+#!/bin/bash
+cat /dev/null > /etc/issue
+
+printf "Nova in a Box " >> /etc/issue
+cat /etc/nova-ubuntu >> /etc/issue
+
+cat >> /etc/issue << EOF
+
+Based on Ubuntu 12.04 LTS \n \l
+Ip Address: `hostname -I`
+Default Login: default/password
+
+type startx so start an X11 session
+
+EOF
