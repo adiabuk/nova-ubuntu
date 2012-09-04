@@ -1,0 +1,17 @@
+user_pref("network.proxy.backup.ftp", "PROXY");
+user_pref("network.proxy.backup.ftp_port", PORT);
+user_pref("network.proxy.backup.socks", "PROXY");
+user_pref("network.proxy.backup.socks_port", PORT);
+user_pref("network.proxy.backup.ssl", "PROXY");
+user_pref("network.proxy.backup.ssl_port", PORT);
+user_pref("network.proxy.ftp", "PROXY");
+user_pref("network.proxy.ftp_port", PORT);
+user_pref("network.proxy.http", "PROXY");
+user_pref("network.proxy.http_port", PORT);
+user_pref("network.proxy.no_proxies_on", "localhost, 127.0.0.1");
+user_pref("network.proxy.share_proxy_settings", true);
+user_pref("network.proxy.socks", "PROXY");
+user_pref("network.proxy.socks_port", PORT);
+user_pref("network.proxy.ssl", "PROXY");
+user_pref("network.proxy.ssl_port", PORT);
+user_pref("network.proxy.type", $type);

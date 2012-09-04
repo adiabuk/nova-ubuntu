@@ -1,0 +1,115 @@
+{
+  "name": "localenv",
+  "default_attributes": {
+    "nova": {
+      "fixed_range": "10.100.0.0/20",
+      "libvirt_type": "LIBVIRT",
+      "num_networks": 1,
+      "config": {
+        "api_ssl_certificate": "/etc/nova/certs/cert.crt",
+        "api_ssl_privatekey": "/etc/nova/certs/key.pem",
+        "compute_scheduler": "nova.scheduler.chance.ChanceScheduler",
+        "glance_use_ssl": "false",
+	"auth_style": "deprecated",
+	"use_deprecated_auth": "true",
+        "default_quota": {
+          "max_injected_file_content_bytes": 10240,
+          "instances": 20,
+          "max_injected_files": 5,
+          "volume": 0,
+          "ram": 204800,
+          "metadata_items": 35,
+          "floating_ips": 20
+        },
+        "glance_api": "127.0.0.1:9292",
+        "ip_routed_interface": "vlan300",
+        "private_vlan_prefix": "10.30.0.0/20",
+        "environment": "localenv",
+        "public_routing_source_prefix": "10.9.0.0/20",
+        "default_instance_type": "standard.xxsmall"
+      },
+      "my_ip_prefix": "10.1.0.0/15",
+      "public_interface": "vlan200",
+      "public_vlan": {
+        "ranges": [
+          "10.9.0.0/20"
+        ],
+        "interface": "eth1",
+        "vlan": 200,
+        "gateway": "10.9.0.1"
+      },
+      "network_size": 256
+    },
+    "repositories": {
+      "role[Nova-messageq]": {
+        "nova-rabbitmq": {
+          "uri": "http://apt.loc/cloud/nova/virtenv",
+          "components": [
+            "unstable",
+            "stable",
+            "testing",
+            "release",
+            "main"
+          ],
+          "distribution": "natty",
+          "key": ""
+        }
+      },
+      "recipe[glance::api]": {
+        "glance": {
+          "uri": "http://apt.loc/cloud/nova/mirror/ppa.launchpad.net/nova-core/milestone-diablo/ubuntu",
+          "components": [
+            "main"
+          ],
+          "distribution": "natty",
+          "key": ""
+        }
+      },
+      "recipe[nova::config]": {
+        "nova": {
+          "uri": "http://apt.loc/cloud/nova/virtenv",
+          "components": [
+            "unstable",
+            "stable",
+            "testing",
+            "release",
+            "main"
+          ],
+          "distribution": "natty",
+          "key": ""
+        }
+      }
+    },
+    "security_level": "green",
+    "version_pins": {
+      "glance": {
+        "glance": {
+          "version": "2011.3.0"
+        }
+      },
+      "nova": {
+        "python-glance": {
+          "version": "2011.3.0"
+        }
+      }
+    }
+  },
+  "json_class": "Chef::Environment",
+  "description": "Local Environment",
+  "cookbook_versions": {
+    "glance": "= 0.2.0",
+    "nova": "= 4.39.0"
+  },
+  "override_attributes": {
+ "nova": {
+      "config": {
+	"auth_style": "deprecated",
+        "enable_api_ssl": "false"
+
+      }
+
+  }
+
+  },
+  "chef_type": "environment"
+}

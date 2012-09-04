@@ -1,0 +1,12 @@
+#!/bin/bash
+(
+source cleanup_functions
+#do echo $i |dialog --guage "djsakldjsalkj" 10 100;sleep 1
+
+preclean
+purge
+delete
+postclean
+
+) 2>&1 | tee /var/log/nova-ubuntu/cleanup.log
+

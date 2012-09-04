@@ -1,0 +1,8 @@
+#!/bin/bash
+
+cd /opt/nova-ubuntu
+
+output=`git checkout master`
+echo $output | grep -q behind
+[[ "$?" -eq 1 ]] || zenity  --info --text="New Nova-Ubuntu updates are now available.\n\nPlease refer to the documentation for update instructions"
+

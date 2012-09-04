@@ -1,0 +1,54 @@
+loc. IN SOA ns1.loc. admin.loc. (
+2007031001
+28800
+3600
+604800
+38400
+)
+
+loc. IN NS ns1.loc.
+
+ns1 IN A IPADDR
+master IN A IPADDR
+apt IN CNAME master
+csnode IN CNAME master
+glance IN CNAME master
+
+; vmware subnets - 10.1.0.0/15:
+; 10.1.0.0/20 - master/admin 
+; 10.1.16.0/20 - compute 
+; 10.1.32.0/20 - spare
+; 10.1.48.0/20 - spare
+; 10.1.63.0/20 - spare
+; etc..... (last host 10.1.255.254)
+
+compute0001 IN A 10.1.16.1
+compute0002 IN A 10.1.16.2
+compute0003 IN A 10.1.16.3
+compute0004 IN A 10.1.16.4
+compute0005 IN A 10.1.16.5
+compute0006 IN A 10.1.16.6
+compute0007 IN A 10.1.16.7
+compute0008 IN A 10.1.16.8
+compute0009 IN A 10.1.16.9
+compute0010 IN A 10.1.16.10
+compute0011 IN A 10.1.16.11
+compute0012 IN A 10.1.16.12
+compute0013 IN A 10.1.16.13
+compute0014 IN A 10.1.16.14
+compute0015 IN A 10.1.16.15
+compute0016 IN A 10.1.16.16
+compute0017 IN A 10.1.16.17
+compute0018 IN A 10.1.16.18
+compute0019 IN A 10.1.16.19
+compute0020 IN A 10.1.16.20
+compute0021 IN A 10.1.16.21
+compute0022 IN A 10.1.16.22
+compute0023 IN A 10.1.16.23
+compute0024 IN A 10.1.16.24
+compute0025 IN A 10.1.16.25
+compute0026 IN A 10.1.16.26
+compute0027 IN A 10.1.16.27
+compute0028 IN A 10.1.16.28
+compute0029 IN A 10.1.16.29
+compute0030 IN A 10.1.16.30

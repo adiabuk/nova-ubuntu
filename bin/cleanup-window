@@ -1,0 +1,7 @@
+#!/bin/bash
+echo "Cleaing up environment..."
+gksudo /usr/local/bin/cleanup
+
+read -p "Enter any key to close the window"
+
+

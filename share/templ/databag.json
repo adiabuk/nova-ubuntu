@@ -1,0 +1,57 @@
+{
+  "VirtualBox": [
+    {
+      "name": "eth0",
+      "netmask": "255.254.0.0",
+      "ip_rp_filter": 0,
+      "method": "static",
+      "ip": "10.1.0.1",
+      "auto": true
+    },
+
+    {
+      "name": "eth1",
+      "netmask": "255.255.255.0",
+      "ip_rp_filter": 0,
+      "method": "static",
+      "ip": "IPADDR",
+      "auto": true,
+      "gateway": "192.168.180.2",
+      "dns": {
+        "nameservers": [
+          "15.203.240.10",
+          "15.203.240.12"
+        ],
+        "search": "localhost.localdomain"
+      }
+    },
+
+
+
+    {
+      "name": "vlan300",
+      "netmask": "255.255.0.0",
+      "ip_rp_filter": 0,
+      "method": "static",
+      "ip": "10.30.0.1",
+      "auto": true,
+      "vlan_raw_device": "eth0"
+    },
+    {
+      "name": "vlan200",
+      "netmask": "255.255.240.0",
+      "ip_rp_filter": 0,
+      "routes": [
+        {
+          "range": "10.9.0.0/20",
+          "dev": "vlan200"
+        }
+      ],
+      "method": "static",
+      "ip": "10.9.0.0",
+      "auto": true,
+      "vlan_raw_device": "eth0"
+    }
+  ],
+  "id": "localenv"
+}

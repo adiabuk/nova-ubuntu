@@ -1,0 +1,10 @@
+#!/bin/bash
+cd /etc/init.d; for i in `ls *nova*`; do service $i restart; done
+
+cd /usr/local/share/nova-testing/
+./run_promo_test
+
+#./diablofinal_nova_smoke_tests_MASTER.v2.sh -p my3 -d Input_files_to_source_RDE -f standard.xxsmall
+
+#./diablofinal_nova_smoke_tests_MASTER.v2.sh -p my3 -d Input_files_to_source_RDE -m imgstandard -f standard.xxsmall
+

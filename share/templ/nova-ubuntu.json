@@ -1,0 +1,26 @@
+{
+  "cookbook_versions": {
+  },
+  "default_attributes": {
+  },
+  "override_attributes": {
+    "repositories": {
+      "role[nova::compute]": {
+        "nova__compute": {
+          "components": [
+            "main"
+          ],
+          "distribution": "precise",
+          "uri": "http://127.0.0.1/cloud"
+        }
+      }
+    },
+    "az": "az1",
+    "area": "niab",
+    "continent": "dev"
+  },
+  "chef_type": "environment",
+  "name": "niab",
+  "json_class": "Chef::Environment",
+  "description": ""
+}

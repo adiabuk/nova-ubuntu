@@ -1,0 +1,15 @@
+#!/bin/bash -x
+
+(
+
+source functions
+#check_multiple;
+check_location;
+prepare_env;
+install_nova;
+setup_nova;
+setup_cleanup;
+
+
+) 2>&1 | tee /var/log/nova-ubuntu/install.log
+

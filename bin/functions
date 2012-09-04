@@ -1,0 +1,188 @@
+#!/bin/bash
+
+function check_multiple() {
+
+#  zenity --question --text "How many nova-ubuntu instances will you have on this physical host?" --cancel-label="Just One" --ok-label="Multiple" --title="Deployment"
+#
+#  if [[ "$?" == 0 ]]; then
+#    # Use DHCP
+#    dhclient eth1
+#    ipaddr=`ifconfig  eth1| grep 'inet addr:' |cut -d: -f2 | awk '{ print $1}'`
+#
+#  else
+#    # Use Single IP
+    ipaddr=192.168.180.129
+#  fi
+
+  ifconfig vlan200 down
+  ifconfig vlan300 down
+  vconfig rem vlan200
+  vconfig rem vlan300
+  sed "s/IPADDR/$ipaddr/g" /usr/local/share/templ/interfaces > /etc/network/interfaces
+  sed "s/IPADDR/$ipaddr/g" /usr/local/share/templ/loc.db > /etc/bind/zones/loc.db
+  chattr -i /etc/resolv.conf
+  sed "s/IPADDR/$ipaddr/g" /usr/local/share/templ/resolv.conf > /etc/resolv.conf
+  chattr +i /etc/resolv.conf
+
+  sed "s/PORT/$port/g;s/PROXY/$proxy/g;s/IPADDR/$ipaddr/g;s/LIBVIRT/$libvirt/g" /usr/local/share/templ/myservices.cfg > /etc/nagios3/conf.d/myservices.cfg
+  /etc/init.d/networking restart
+  service bind9 restart
+  service nagios3 restart
+}
+
+
+function check_location() {
+  echo "Testing location..."
+  nc -z -w1 internal_address.co.uk 8080 &>/dev/null; [[ $? -eq 0 ]] && location=remote
+  nc -z -w1 www.google.com 80 &> /dev/null ; [[ $? -eq 0 ]] && location=home
+ 
+  case "$location" in
+    "remote")
+      proxy="10.0.0.1"
+      port="8088"
+      type=1
+      libvirt="kvm"
+      ;;
+   *)
+      proxy=""
+      port=""
+      type=0
+      libvirt="kvm"
+      ;;
+
+#    *)
+#      echo "Unable to verify location, plese check network settings and try again, exiting..."
+#      exit 66
+#      ;;
+
+    esac
+
+  echo "location is $location"
+  echo "Setting APT Proxy..."
+  cat /usr/local/share/templ/apt.conf > /etc/apt/apt.conf 
+  sed -i 's/PROXY/'$proxy'/g' /etc/apt/apt.conf
+  sed -i 's/PORT/'$port'/g' /etc/apt/apt.conf
+  echo -e "done\n\n"
+  echo "Setting Firefox Proxy..."
+  sed -i '/proxy/d' /home/default/.mozilla/firefox/*.default/prefs.js
+  cat /usr/local/share/templ/prefs.js > /home/default/.mozilla/firefox/*.default/prefs.js
+  sed -i 's/PROXY/'$proxy'/g' /home/default/.mozilla/firefox/*.default/prefs.js
+  sed -i 's/PORT/'$port'/g' /home/default/.mozilla/firefox/*.default/prefs.js
+  sed "s/PORT/$port/g;s/PROXY/$proxy/g;s/IPADDR/$ipaddr/g;s/LIBVIRT/$libvirt/g" /usr/local/share/templ/environment.json > /tmp/env.json
+  sed "s/PORT/$port/g;s/PROXY/$proxy/g;s/IPADDR/$ipaddr/g;s/LIBVIRT/$libvirt/g" /usr/local/share/templ/databag.json > /tmp/db.json
+
+
+
+  echo -e "done\n\n"
+
+  echo "Setting ftest proxy..."
+
+  sed -i '/PROXY/d' /usr/local/share/nova-testing/Input_files_to_source_RDE/conf.env
+  cat /usr/local/share/templ/ftest.txt >> /usr/local/share/nova-testing/Input_files_to_source_RDE/conf.env 
+
+  echo "Applying environment file.."
+  knife environment from file /tmp/env.json
+  echo -e "done\n\n"
+  echo "Applying databag"
+  knife data bag from file interfaces /tmp/db.json
+  echo -e "done\n\n"
+
+}
+
+function prepare_env() {
+
+
+export HOME="/root"
+
+knife environment create niab -n
+knife environment from file /usr/local/share/templ/nova-ubuntu.json
+knife node from file /usr/local/share/templ/node.json
+mkdir -p /var/www/cloud/nova/virtenv/conf /var/www/cloud/nova/archive
+mkdir /home/default/Desktop /home/default/Downloads
+dpkg -i /opt/nova-ubuntu/share/*.deb
+disable_chef
+grep -vq vmx /proc/cpuinfo && sed -i 's/kvm/qemu/g' /mnt/nova-chef/data_bags/nova/misc_dev_niab_az1.json
+
+
+}
+
+function install_nova() {
+
+cd /etc/init.d/
+for i in `ls chef*|grep -v client`; do echo $i;service $i restart ;done
+knife cookbook upload nova repositories -o /mnt/nova-chef/cookbooks:/mnt/release_train/basenode/cookbooks:/mnt/release_train/techops/cookbooks:/mnt/release_train/dbaas/cookbooks:/mnt/release_train/control-services/cookbooks -d
+cd /mnt/nova-chef/data_bags
+for i in `ls`;do knife data bag create $i;done
+for i in `find |grep json$`; do j=`echo $i|awk -F/ {'print $2'}`; knife data bag from file $j $i;done
+cd /mnt/nova-chef/roles
+knife role from file *.json
+/mnt/nova-buildhelper/apt-publish-virtenv --tar /opt/promotion_nova*.gz
+apt-get update
+chef-client
+knife node run_list add nova-ubuntu role[Nova-Ubuntu]
+apt-get -y -f install
+disable_chef
+groupadd glance
+chef-client
+chef-client
+chef-client
+
+  
+}
+
+function setup_nova {
+
+#  /usr/local/bin/initial.sh
+#  . /var/lib/nova/nova-ubuntu/novarc 
+###########################################
+cd /etc/init.d
+for i in `ls nova-*`; do stop $i;done
+for i in `ls glance-*`; do stop $i;done
+rm -rf /var/lock/nova
+for i in `ls nova-*`; do start $i;done
+for i in `ls glance-*`; do start $i;done
+
+restart glance-api 
+restart glance-registry 
+source /usr/local/bin/create_user.sh
+
+nova-manage service enable   --host=nova-ubuntu-service=nova-scheduler
+nova-manage service enable   --host=nova-ubuntu --service=nova-compute
+nova-manage service enable   --host=nova-ubuntu --service=nova-cert
+nova-manage service enable   --host=nova-ubuntu --service=nova-network
+nova-manage network create --fixed_range_v4=10.10.0.0/20 --multi_host=T --num_networks=1 --network_size=256 --label=private
+nova-manage floating create --ip_range=10.30.0.0/20
+
+nova keypair-add mykeypair > /usr/local/share/mykeypair.priv
+nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
+tar zxvf /opt/nova-ubuntu/share/images/cirros*gz -C /tmp
+
+tenantid=`keystone tenant-list|grep default|awk {'print $2'}`
+nova-manage project quota $tenantid floating_ips 1000
+nova-manage project quota $tenantid instances 10000
+nova-manage project quota $tenantid cores 20000
+nova-manage project quota $tenantid ram 512000000
+nova-manage project quota $tenantid gigabytes 1000000
+nova-manage project quota $tenantid volumes 1000
+
+kernelid=`glance add disk_format=aki container_format=aki name=kernel < /tmp/cirros-0.3.0-x86_64-vmlinuz 2>/dev/null|tail -1|grep ID:|awk {'print $6'}`
+ramdiskid=`glance add disk_format=ari container_format=ari name=initrd < /tmp/cirros-0.3.0-x86_64-initrd 2>/dev/null |tail -1|grep ID:|awk {'print $6'}`
+glance add disk_format=ami container_format=ami name=disk kernel_id=${kernelid} ramdisk_id=${ramdiskid} < /tmp/*.img
+
+nova boot --image=disk --flavor=1 at_boot_test
+
+
+###########################
+
+
+}
+
+function setup_cleanup {
+  cd /etc/init.d; 
+  for i in `ls *nova*`; do service $i restart ;done
+  for i in `ls *glance*`; do service $i restart ;done
+  unset http_proxy
+  apt-get -y install virt-manager
+  touch /var/cache/niab/install.lck
+}
+

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [[ -z $1 ]]; then
+echo "Enter address of an internal webserver with port 80 open to test VPN access"
+  exit 1
+  host=$1
+else
+  host=$1
+fi
+
+ nc -z -w1 $host 80 2>/dev/null
+ access=$?
+
+if [[ $access -eq 0 ]]; then
+  echo "VPN is available"
+  exit 0
+else
+  echo "No VPN available"
+  exit 2
+fi
+

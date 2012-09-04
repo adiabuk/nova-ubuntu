@@ -1,0 +1,12 @@
+#!/bin/bash
+
+cleanup
+
+cat /dev/null > /root/.bash_history
+cat /dev/null > /home/hpcs/.bash_history
+
+cd /var/log;
+for i in `find`; do cat /dev/null > $i;done 2>/dev/null
+
+dd if=/dev/zero of=/0bits bs=20971520 count=5120 # bs=20m
+rm /0bits

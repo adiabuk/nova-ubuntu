@@ -1,0 +1,15 @@
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth1 inet static
+    address IPADDR
+    netmask 255.255.255.0
+    gateway 192.168.180.2
+    dns-nameservers IPADDR
+    dns-search .lcl
+
+auto eth1
+iface eth0 inet static
+address 10.1.0.1
+netmask 255.254.0.0

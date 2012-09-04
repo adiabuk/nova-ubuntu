@@ -1,0 +1,15 @@
+{
+  "chef_environment": "nova-ubuntu",
+  "run_list": [
+
+  ],
+  "name": "nova-ubuntu.loc",
+  "normal": {
+    "tags": [
+
+    ]
+  },
+  "json_class": "Chef::Node"
+
+}
+

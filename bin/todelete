@@ -1,0 +1,32 @@
+/var/log/ufw 
+/var/lib/ufw
+/var/lib/nova 
+/etc/nova 
+/var/lib/novaauto 
+/usr/share/pyshared/novaclient 
+/usr/share/pyshared/python_novaclient* 
+/var/lib/update-rc.d/nova* 
+/var/log/nova 
+/usr/lib/python2.6/dist-packages/novaclient 
+/usr/bin/nova* 
+/usr/lib/python2.7/dist-packages/novaclient 
+/usr/lib/python2.6/dist-packages/python_nova* 
+/usr/lib/python2.7/dist-packages/python_nova* 
+/var/lib/libvirt/images 
+/var/log/mysql
+/usr/local/share/hpcs-nova-testing/192*
+/usr/local/share/hpcs-nova-testing/Input_files_to_source_RDE/*my*
+/var/log/libvirt/ /var/lib/libvirt/ 
+/var/cache/libvirt/
+/etc/apparmor.d
+/etc/apparmor  /var/log/apparmor/
+/var/lib/update-rc.d/libvirt-bin
+/var/lib/update-rc.d/libvirt-cgred-wait
+/var/lib/apt/lists/lock
+/var/lib/mysql
+/etc/mysql
+/var/log/glance 
+/var/lib/update-rc.d/glance*
+/var/lib/glance 
+/etc/glance
+/var/log/nova-ubuntu/*
