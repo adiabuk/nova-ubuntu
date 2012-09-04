@@ -1,0 +1,4 @@
+#!/bin/bash
+
+tar zxvf cirros-0.3.0-x86_64-uec.tar.gz -C /tmp
+glance add name=cirros-0.3.0-x86_64 disk_format=qcow2 container_format=bare is_public=true < cirros-0.3.0-x86_64-blank.img
