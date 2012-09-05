@@ -1,0 +1,120 @@
+The following describes how to setup Nova-Ubuntu on Linux , specifically Ubuntu 11.04 x86_64.  Although this image has been successfully tested in a Windows environment, this FAQ assumes you are using Ubuntu.
+
+NOTE: This document describes the old manual method of install nova-ubuntu.  Please see README.md for the new improved method.
+
+1. Setting up Virtual Environment
+=================================
+
+Prerequisites:
+* Vmware Player 4.x 64 bit installed in Linux environment
+* Full Root Access
+* Juniper VPN connectivity to HP from host machine
+* Min: 100GB HD Free, 2GB+ RAM Free, 2+ available CPU cores
+* Internet access from Host (with or without proxy)
+
+
+
+a) Extract the file vmimg-nova_3.102.0-1030_110112.tar.gz
+and place the new directory in your home directory.   
+
+b) Backup directory /etc/vmware and extract vmware_linux-1030_110112.tar.gz
+
+c) Place extracted vmware directory in /etc
+
+d) restart vmware service (sudo /etc/init.d/vmware restart)
+
+e) restart networking service (sudo /etc/init.d/networking restart)
+
+e) run ifconfig vmnet8, ensure the IP address is 192.168.180.1
+If not, retrace steps above and/or reboot physical machine
+
+f) Start Vmware.  Ensure there are no other related VMs running.
+
+g) File Menu=>Open a virtual Machine
+Open the vmx from your extracted directory
+
+h) Turn on virtual machine should boot into XWindows/Gnome 2
+When asked if the VM was copied or moved, click on "I copied it"
+If prompted to install vmware tools, click on "remind me later"
+Wait to boot.
+
+2. Setting up Nova
+==================
+
+Background:
+The image itself doesn't have nova installed, but has the facilities to install it.  This is because there are environment specific settings which need to be specified at install time depending on the location.  Ie. Bristol, Hyderabad, or home (no proxy).  Automated scripts allow this to be done without any manual intervention.
+
+a) Clean the environment:
+In the environment, Go to:
+Applications Menu => Nova-Ubuntu Cleanup
+you will be prompted for the password: "password"
+This will uninstall any versions of nova, and cleanup the environment
+Once complete, open a terminal and type "sudo reboot" to reboot the machine.
+
+b) Reinstalling the environment:
+In the environment, Go to:
+Applications Menu => Nova-Ubuntu => Install
+you will be prompted for the password: "password"
+This will detect your location and adjust the environment as appropriate.  
+Eg. proxy settings in various locations, and choose between KVM/QMU.
+The installer will take approximately 5-10 minutes depending on network speed.
+Note: the installer will terminate if any errors are encountered.  A complete log of the install process will be saved to /home/default/install.out
+
+
+c) Testing the environment:
+In the environment, Go to:
+Applications Menu => Nova-Ubuntu => Functional Tests
+you will be prompted for the password: "password"
+This will run the function tests and will give you an idea of the status of nova.  You can run this at any time.
+
+
+3. Troubleshooting
+==================
+
+a) Nagios:
+A small nagios instance has been installed in the image.
+While running tests, and making code changes etc. its a good idea to keep an eye on the Nagios status indicator.  This is an "N" located in the notification area at the top of the VM screen.  When Green there are no issues.  If red, click on it to get additional information on which services are having issues.
+
+Current checks available are:
+Nova-api - status of the nova-api service, specifically port 8873
+Ping Gateway - Ability to ping the NATTED gateway address: 192.168.180.2 (via eth0)
+Ping host - Ability to ping the NATTED guest address: 192.168.180.1 (via eth0)
+Ping Self - Ability to ping the NATTED IP (eth0): 192.168.180.129
+Ping private - Ability to ping the private adapter address (brx1): 10.1.0.1
+Ping public - Ability to ping the public adapter address (vlan200): 10.100.1.0
+Ping routed - Ability to ping the routed adapter address (vlan300): 10.30.0.1
+chef-server - status of the chef-server service, specifically port 4000
+chef-server-webui - status of the chef-server-webui service, specifically port 4040
+glance-api - status of the glance-api service, specifically port 9292
+glance-registry - status of the glance-registry service, specifically port 9191
+nova-compute - status of the nova-compute service, specifically port 5672
+
+After running the cleanup script (2a. above), many of these services will be red.  Ping Private should only go green once you have tried to be build an instance as this is when the adapter is created.
+
+There will likely be more checks in future releases of the VM
+
+b) Other checks: 
+
+Insure you can resolve addresses:
+nslookup www.google.com
+nslookup gb.ubuntu.com
+nslookup 194.169.254.10
+
+Insure you can ssh to/from host machine & guest VM
+
+Keep an eye on disk/memory/CPU usage.  A system monitor applet is located at the top of the screen.  Click on it for more details.
+
+We have a full cleanup and reinstall procedure. Note that it is very destructive. It usually resolves problems.
+a) Click "Applications => Nova-Ubuntu => Cleanup" (or open a terminal and run /usr/local/bin/cleanup as root)
+b) reboot
+c) Click "Applications => Nova-Ubuntu => Install" (or open a terminal and run /usr/local/bin/install as root)
+
+
+
+c) Best Practises:
+As the VM Image is restricted to 100GB HD and 2GB RAM creating many instances and/or snapshots will quickly fill up space and resources.
+The smallest nova flavor currently requires 30GB HD and 1GB only 3 instances can be launced at any one time.
+For this purpose we have provided a new nova flavor: standard.xxsmall.  ID: 99
+This requires only 256MB RAM and 2GB HD per instance.  This will enable you to run much more instances per VM without exhausting resources.
+Note: this is only available in the VM, and is not used in any other environment.  
+
